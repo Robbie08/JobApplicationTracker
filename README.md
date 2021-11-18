@@ -1,7 +1,13 @@
 # JobApplicationTracker
 
+### Getting Started
+* To run this application you will need to have [node.js](https://nodejs.org/en/) and [yarn](https://yarnpkg.com/getting-started/install) installed
+* Next clone this project in desired directory by using `git clone git@github.com:Robbie08/JobApplicationTracker.git`
 
-### How to contribute :
+### Running Application
+* Please reffer to the README.md in `JobApplicationTracker/client/` for instructions on running client application
+
+### How to contribute 
 1. Create a feature branch on your clone (This can be named anything)
    - `$ git checkout -b my-awesome-feature`
 2. Do work and commit your changes
