@@ -2,7 +2,7 @@
 
 ### Getting Started
 * To run this application you will need to have [node.js](https://nodejs.org/en/) and [yarn](https://yarnpkg.com/getting-started/install) installed
-* Next clone this project in desired directory by using `git clone git@github.com:Robbie08/JobApplicationTracker.git`
+* Next clone this project by using `git clone git@github.com:Robbie08/JobApplicationTracker.git`
 
 ### Running Application
 * Please refer to the README.md in `JobApplicationTracker/client/` for instructions on running client application
