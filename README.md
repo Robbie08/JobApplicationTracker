@@ -6,7 +6,7 @@
 
 ### Running Application
 * Please refer to the README.md in `JobApplicationTracker/client/` for instructions on running client application
-
+* To spin-up our server we can use `npm start` or `yarn start`
 ### How to contribute 
 1. Create a feature branch on your clone (This can be named anything)
    - `$ git checkout -b my-awesome-feature`
