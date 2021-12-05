@@ -3,8 +3,6 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Axios from 'axios';
 import {useNavigate} from "react-router-dom";
-import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
 
 function Login() {
 
@@ -32,9 +30,15 @@ function Login() {
                 username: username, 
                 password: password
             }).then((response) => {
-                console.log(`Response! : ${response}`)
-            });        
-            navigate("/applications")
+                console.log(`Response! : ${response.data}`)
+                if(response.data.message){
+                    setLoginStatus(response.data.message);
+                }else{
+                    navigate("/applications")   // this will change the route and send us to the applications list page
+                }
+            }).catch(err => {
+                return err;
+            });    
         }else{
             setLoginStatus("Error: please enter non null fields");
         }
@@ -56,7 +60,35 @@ function Login() {
                 username: username, 
                 password: password
             }).then((response) => {
-                console.log(`Response! : ${response}`)
+                console.log(`Response! : ${response.data}`)
+                setLoginStatus(response.data)
+            }).catch(err => {
+                return err;
+            });        
+            //window.open("https://www.google.com/", "_blank")    // params (URL, "_blank"); _blank opens url in new tab
+
+            setUsername("");
+            setPassword("");
+        }
+        else{
+            console.log("register values are null")
+        }
+    } 
+
+    function onDeleteUser () {
+        // make sure to clear text
+        console.log("UserName: " +username);
+        console.log("Password: " +password);
+
+        if(username != "" && password != ""){
+            Axios.post("http://localhost:4000/api/deleteUser", {
+                username: username, 
+                password: password
+            }).then((response) => {
+                console.log(`Response! : ${response.data}`)
+                setLoginStatus(response.data)
+            }).catch(err => {
+                return err;
             });        
             //window.open("https://www.google.com/", "_blank")    // params (URL, "_blank"); _blank opens url in new tab
 
@@ -86,9 +118,10 @@ function Login() {
                 <div className="login-form-buttons">
                     <Button onClick={() => onLoginClick()} variant="contained">Login</Button>
                     <Button onClick={() => onRegisterClick()} variant="contained">Register</Button>
+                    <Button onClick={() => onDeleteUser()} variant="contained">Delete User</Button>
                 </div>
             </div>
-            <h1>{loginStatus}</h1>
+            <h4>{loginStatus}</h4>
         </div>
     )
 
