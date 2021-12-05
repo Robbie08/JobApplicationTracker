@@ -6,8 +6,8 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { CardHeader } from '@mui/material';
-
+import { CardHeader, listClasses } from '@mui/material';
+import Axios from 'axios';
 
 function ApplicationList() {
   
@@ -21,7 +21,29 @@ function ApplicationList() {
   const [linkToApplication, setLinkofApplication] = useState("");
   const [status, setStatus] = useState("");
   const [comments, setComments] = useState("");
+  const  [companyList, setCompanyList] = useState([{applicationId: 3, company: 'Google', position: 'Software Engineer I', date: 'Aug 12, 2021'}, {applicationId: 4, company: 'Intuit', position: 'Software Engineer II', date: 'July 10, 2021'}]);
 
+
+  
+    function getApplicationList(){
+      Axios.get('http://localhost:4000/api/getApplications')
+      .then((response) => response.data )
+      .then((response) => { 
+        setCompanyList([{response}]);
+      });
+
+      console.log(companyList)
+    }
+
+    function onSubmitApplication(){
+      Axios.post('http://localhost:4000/api/addApplication',{
+          company: company,
+      })
+      .then((response) => {
+          console.log(response)
+      });
+      getApplicationList();
+    }
     /**
      *  This function is called when the "edit" button is clicked on the card
      *  We can find the call inside the <Button> tag
@@ -54,6 +76,7 @@ function ApplicationList() {
      * The value={} will grab our value from our state and display whatever the current state is set to. By default it's "".
      * We use the onChange={e => this.setState({})} to allow for user input into the text field.
      */
+     
         return(         
             <div>
                 <h2>Applications</h2>
@@ -61,46 +84,51 @@ function ApplicationList() {
                 <div className="input-form">
                   <div className="input-form">
                   <TextField onChange={e => {setCompany(e.target.value)}} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
-                  <TextField onChange={e => {setCompany(e.target.value)}} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
                   </div>
-                 <div><Button variant="contained">Submit</Button></div>
+                 <div><Button onClick={() => onSubmitApplication()} variant="contained">Submit</Button></div>
                 </div>
+          
                 
-                <Card sx={{ maxWidth: 345 }}>
+                <div className="ui-cards">
+                    {companyList.map((record) => (
+                        <Card sx={{ maxWidth: 345 }}>
+                          {/* we can edit card content starting here*/}
+                          <CardHeader 
+                              title={record["company"]}
+                              subheader={record["position"]}
+                          />
+                          <CardMedia
+                            component="img"
+                            width= "50%"
+                            height= "160"
+                            image={`${process.env.PUBLIC_URL}/images/google.png`   /*This accesses our working dir at public/images/   */}
+                            alt="job_post"
+                          />
+                          
+                          <CardContent>
+                            <Typography  align="left" variant="body2" color="text.secondary">
+                              Date: {record["date"]}
+                            </Typography>
+                            <Typography align="left" variant="body2" color="text.secondary">
+                              Status: Final Round
+                            </Typography>
+                            <Typography  align="left" variant="body2" color="text.secondary">
+                              Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...
+                            </Typography>
+                          </CardContent>
+                          <CardActions>
 
-                {/* we can edit card content starting here*/}
-                <CardHeader 
-                    title="Google"
-                    subheader="Software Engineer I"
-                />
-                <CardMedia
-                  component="img"
-                  width= "50%"
-                  height= "160"
-                  image={`${process.env.PUBLIC_URL}/images/google.png`   /*This accesses our working dir at public/images/   */}
-                  alt="job_post"
-                />
+                          {/*We use onClick caller to call our handler functions... that we put outside of render */}
+                            <Button size="small" onClick={() => this.onEditClick()}>Edit</Button>
+                            <Button size="small" onClick={() => this.onDeleteClick()}>Delete</Button>
+                            <Button size="small" onClick={() => this.onGoToPortalClick()}>Go To Portal</Button>
+                          </CardActions>
+                      </Card>
 
-                <CardContent>
-                  <Typography  align="left" variant="body2" color="text.secondary">
-                    Date: Novemeber 12,2021
-                  </Typography>
-                  <Typography align="left" variant="body2" color="text.secondary">
-                    Status: Final Round
-                  </Typography>
-                  <Typography  align="left" variant="body2" color="text.secondary">
-                    Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...
-                  </Typography>
-                </CardContent>
-                <CardActions>
-
-                {/*We use onClick caller to call our handler functions... that we put outside of render */}
-                  <Button size="small" onClick={() => this.onEditClick()}>Edit</Button>
-                  <Button size="small" onClick={() => this.onDeleteClick()}>Delete</Button>
-                  <Button size="small" onClick={() => this.onGoToPortalClick()}>Go To Portal</Button>
-                </CardActions>
-              </Card>
+                    ))} 
                 
+                </div>
+                  
             </div>
             
         )
