@@ -63,11 +63,13 @@ class ApplicationList extends React.Component {
                 <h2>Applications</h2>
         
                 <div className="input-form">
-                 <TextField value={this.state.task} onChange={e => this.setState({company: e.target.value})} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
+                  <div className="input-form">
+                  <TextField value={this.state.task} onChange={e => this.setState({company: e.target.value})} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
+                  <TextField value={this.state.task} onChange={e => this.setState({company: e.target.value})} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
+                  </div>
+                 <div><Button variant="contained">Submit</Button></div>
                 </div>
-                <div><Button variant="contained">Submit</Button></div>
                 
-
                 <Card sx={{ maxWidth: 345 }}>
 
                 {/* we can edit card content starting here*/}
