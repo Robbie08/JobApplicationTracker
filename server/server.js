@@ -61,6 +61,26 @@ app.get("/deleteApplication", (req, res) => {
 })
 
 
+app.post("/api/login"), (req, res) => {
+    const username = req.body.username
+    const password = req.body.password
+    // const username = "uniqueuser2"
+    // const password = "1234"
+
+    let authError = false;
+
+    // check if this user does not exist first
+    const sqlValidateUser = `SELECT * FROM users WHERE username = ?;`
+    // db.query(sqlValidateUser, [username], (err, result) => {
+    //         res.send({err: err});
+
+    //         if(result.length > 0){
+    //             res.send(result);
+    //             userExists = true;
+    //         }
+    // })
+}
+
 /** 
  * Logic to handle register user
  */
@@ -72,13 +92,32 @@ app.post("/api/register", (req, res) => {
     // const username = "uniqueuser2"
     // const password = "1234"
 
-    //res.send(`username: ${username} ; password ${password}`);
-    console.log("username: "+username)
-    const sqlInsert = `INSERT INTO user (username, password) VALUES (?,?);`
-    db.query(sqlInsert, [username, password], (err, result) => {
-        console.log(err);
-        res.send("You hit me!")
-    })
+    let authError = false;
+
+    // check if this user does not exist first
+    const sqlValidateUser = `SELECT * FROM users WHERE username = ?;`
+    // db.query(sqlValidateUser, [username], (err, result) => {
+    //         res.send({err: err});
+
+    //         if(result.length > 0){
+    //             res.send(result);
+    //             userExists = true;
+    //         }
+    // })
+
+    if(username == null || password == null){
+        res.send({message: "Fields cannot be null"})
+        authError = true
+    }
+
+    if(authError != true){
+        // Only if this user is not in the records, let's create the account
+        const sqlInsert = `INSERT INTO user (username, password) VALUES (?,?);`
+        db.query(sqlInsert, [username, password], (err, result) => {
+            console.log(err);
+            res.send("You hit me!")
+        })
+    }
 });
 /** 
  * Tell our express server to listen on port 4000.
