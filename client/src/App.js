@@ -3,13 +3,17 @@ import './App.css';
 
 import ApplicationList, {} from "./Components/applicationList";
 import Login from './Components/login';
-import {Link} from "react-router-dom";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+
 
 function App() {
   return (
-    <div className="App">
-      <h1>Welcome to the app!</h1>
-    </div>
+    <Router>
+      <Routes>
+        <Route exact path="/" element={<Login></Login>} />
+        <Route exact path="/applications" element={<ApplicationList></ApplicationList>}/>
+      </Routes>
+    </Router>
   );
 }
 

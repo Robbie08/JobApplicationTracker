@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import TextField from '@mui/material/TextField';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -9,26 +9,24 @@ import Typography from '@mui/material/Typography';
 import { CardHeader } from '@mui/material';
 
 
-class ApplicationList extends React.Component {
-    
-    /**
-     * We use this to track state of fields
-     */
-    state = {
-        company : "",
-        positionTitle: "",
-        dateApplied: "",
-        methodOfApplication: "",
-        linkToApplication: "",
-        status: "",
-        comments: ""
-    }
+function ApplicationList() {
+  
+  /**
+   * We use this to track state of fields
+   */
+  const [company, setCompany] = useState("");
+  const [positionTitle, setPositionTitle] = useState("");
+  const [dateApplied, setDateApplied] = useState("");
+  const [methodOfApplication, setMethodOfApplication] = useState("");
+  const [linkToApplication, setLinkofApplication] = useState("");
+  const [status, setStatus] = useState("");
+  const [comments, setComments] = useState("");
 
     /**
      *  This function is called when the "edit" button is clicked on the card
      *  We can find the call inside the <Button> tag
      */
-    onDeleteClick = () => {
+    function onDeleteClick(){
         // do stuff when button is clicked
         console.log('Clicked Delete!')
     }
@@ -37,7 +35,7 @@ class ApplicationList extends React.Component {
      * This function is called when the "delete" button is clicked on the card
      * We can find the call inside the <Button> tag
      */
-    onEditClick = () => {
+    function onEditClick(){
         // do stuff when button is clicked
         console.log('Clicked Edit!')
     }
@@ -46,7 +44,7 @@ class ApplicationList extends React.Component {
      * This function is called when the "delete" button is clicked on the card
      * We can find the call inside the <Button> tag
      */
-    onGoToPortalClick = () => {
+    function onGoToPortalClick(){
         // Go to application link
         console.log('Go To Portal Clicked')
         window.open("https://www.google.com/", "_blank")    // params (URL, "_blank"); _blank opens url in new tab
@@ -56,16 +54,14 @@ class ApplicationList extends React.Component {
      * The value={} will grab our value from our state and display whatever the current state is set to. By default it's "".
      * We use the onChange={e => this.setState({})} to allow for user input into the text field.
      */
-    render(){
-        console.log(this.state.company) /* This will print out every character change inside the text company text box */
         return(         
             <div>
                 <h2>Applications</h2>
         
                 <div className="input-form">
                   <div className="input-form">
-                  <TextField value={this.state.task} onChange={e => this.setState({company: e.target.value})} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
-                  <TextField value={this.state.task} onChange={e => this.setState({company: e.target.value})} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
+                  <TextField onChange={e => {setCompany(e.target.value)}} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
+                  <TextField onChange={e => {setCompany(e.target.value)}} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
                   </div>
                  <div><Button variant="contained">Submit</Button></div>
                 </div>
@@ -108,7 +104,6 @@ class ApplicationList extends React.Component {
             </div>
             
         )
-    }
 }
 
 export default ApplicationList;
