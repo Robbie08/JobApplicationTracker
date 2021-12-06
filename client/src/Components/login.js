@@ -8,7 +8,7 @@ function Login() {
 
     let navigate = useNavigate();
 
-    
+    Axios.defaults.withCredentials = true;  // we need this in order to access our cookies
     /**
      * We use this to track state of fields
      */
@@ -16,6 +16,22 @@ function Login() {
     const [password, setPassword] = useState("");
     const [loginStatus, setLoginStatus] = useState("");
 
+
+
+    // This useEffect will allow us to retrieve the list of companies once the page is refreshed
+    React.useEffect(()=>{
+        console.log("Component mounted at -> " +Date.now())
+
+        // this endpoint looks exactly like the one from the other login, except
+        // this one is a GET request while the other one is a POST request
+        Axios.get("http://localhost:4000/api/login")
+        .then((response) => {
+            console.log(response);
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    },[])
     /**
      * This function is called when the "delete" button is clicked on the card
      * We can find the call inside the <Button> tag

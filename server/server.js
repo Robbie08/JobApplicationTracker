@@ -6,16 +6,41 @@
  * This server is using nodemon so we don't need to restart our server after
  * making changes. 
  */
-const express = require('express'); // save a express ref
-const cors = require('cors');       // save a corse ref
-const portListen = 4000;            // port on which we will listen
-const mysql = require("mysql");
+const express       = require('express');           // save a express ref
+const cors          = require('cors');              // save a corse ref
+const portListen    = 4000;                         // port on which we will listen
+const mysql         = require("mysql");             // to allow us to interact with mySQL DB
+const bcrypt        = require("bcrypt")             // allos us to use hashing algorithms to secure passwords
+const bodyParser    = require("body-parser");       // parses the front-end body
+const cookieParser  = require("cookie-parser");     // parse all cookies
+const session       = require("express-session")    // creating sessions
+const saltRounds    = 10
 
 const app = express();   // save instance of express in app
 app.use(express.json()); // to help unpackage json payload
-app.use(cors());         // allows cross platform multiplexing
 
+// allows cross platform multiplexing
+app.use(cors({
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST", "DELETE"],
+    credentials: true
+}));         
 
+// establishes our ability to use these tools
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: true}));
+
+app.use(
+    session({
+    key: "userId",
+    secret: "csproject",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        expires: 60 * 60 *24,
+    },
+    })
+);
 /**
  * Create connection with our database!
  * 
@@ -57,17 +82,19 @@ app.get("/api/getApplications", (req,res) =>{
  */
  app.post("/api/addApplication", (req, res) => {
 
-    const company = req.body.company
-    const position = "Software Engineer II"
-    const date = "July 10, 2021"
-    // const username = "uniqueuser2"
-    // const password = "1234"
+    const company   = req.body.company;
+    const position  = req.body.position;
+    const date      = req.body.date;
+    const link      = req.body.link;
+    const appstatus = req.body.appstatus;
+    const comments  = req.body.comments;
 
-    let authError = false;
+    if(link == null)
+        link = "n/a";
 
     // Only if this user is not in the records, let's create the account
-    const sqlInsert = `INSERT INTO jobapplication (company, position, date) VALUES (?,?,?);`
-    db.query(sqlInsert, [company, position, date], (err, result) => {
+    const sqlInsert = `INSERT INTO jobapplication (company, position, date, method, appstatus, comments) VALUES (?,?,?,?,?,?);`
+    db.query(sqlInsert, [company, position, date, link,appstatus,comments], (err, result) => {
         console.log(err);
         res.send("You hit me!")
     })
@@ -108,40 +135,37 @@ app.delete("/api/deleteApplication/:appId", (req, res) => {
 })
 
 
+app.get("/api/logininfo", (req, res) => {
+    const getSessionUser = "SELECT * FROM jobapplicationtracker.usersession WHERE sessionId = 1;"
+    db.query(getSessionUser, (req,resp) => {
+        res.send(resp);
+    })
+
+    console.log("Cookies from logininfo:")
+    console.log(req.cookies);
+
+})
+
+// This one handles obtaining current session user information
+app.get("/api/login", (req, res) => {
+    // ask if the user is logged in
+
+
+    console.log(req.session.user)
+    if(req.session.user){
+        console.log("Logged In")
+        res.send({loggedIn: true, user: req.session.user})
+    } else{
+        console.log("Not logged In")
+        res.send({loggedIn: false}) // if the user is not logged in
+    }
+});
+
+
+// This one handles login from the login page (Authenticating)
 app.post("/api/login", (req, res) => {
     const username = req.body.username
     const password = req.body.password
-
-    // check if this user does not exist first
-    const sqlValidateUser = "SELECT * FROM jobapplicationtracker.user WHERE `username` = ? AND `password` = ?;"
-    db.query(sqlValidateUser, [username, password], (err, result) => {
-            if(err){
-                res.send({err: err});
-            }
-
-            /* If we got a username and password with a match */
-            if(result.length > 0){
-                //console.log(result);
-                res.send("Logged in!")
-            } else if(result.length == 0){
-                res.send({message: "Wrong Username/Password"})
-            }
-
-    })
-});
-
-/** 
- * Logic to handle register user
- */
-
-app.post("/api/register", (req, res) => {
-
-    const username = req.body.username
-    const password = req.body.password
-    // const username = "uniqueuser2"
-    // const password = "1234"
-
-    let authError = false;
 
     // check if this user does not exist first
     const sqlValidateUser = "SELECT * FROM jobapplicationtracker.user WHERE `username` = ?;"
@@ -152,21 +176,67 @@ app.post("/api/register", (req, res) => {
 
             /* If we got a username and password with a match */
             if(result.length > 0){
-                //console.log(result);
-                res.send("You already have an account!")
-                authError = true; // set this flag so we don't crate another user
-            }
-            else if(result.length == 0){
-                // Only if this user is not in the records, let's create the account
-                const sqlInsert = `INSERT INTO user (username, password) VALUES (?,?);`
-                db.query(sqlInsert, [username, password], (err, result) => {
-                    console.log(err);
-                    res.send("User successfully registerd!")
+                //console.log(result[0].password);
+                // check if hash is correct
+                bcrypt.compare(password, result[0].password, (error, response) => {
+                    if(response){
+                        req.session.user = result
+                        res.send(result);
+                        
+                        // Will update our cache to have the current user
+                        const sqlInsert = "UPDATE jobapplicationtracker.usersession SET `userId` = ?, `username` = ?, `password` = ? WHERE sessionId = 1;"
+                        db.query(sqlInsert, [result[0].userId, username, result[0].password], (err, result) => {
+                            console.log(err);
+                        })
+                        
+                    }else{
+                        res.send({message: "Wrong Username/Password"})
+                    }
                 })
+                
+            } else if(result.length == 0){
+                res.send({message: "User does not does not exist"})
             }
 
     })
+});
 
+/** 
+ * Logic to handle register user
+ */
+app.post("/api/register", (req, res) => {
+    const username = req.body.username
+    const password = req.body.password
+
+    bcrypt.hash(password, saltRounds, (err, hash) => {
+        if(err){
+            res.send({err:err})
+        }
+
+        // Only if this user is not in the records, let's create the account
+        const sqlValidateUser = "SELECT * FROM jobapplicationtracker.user WHERE `username` = ?;"
+        db.query(sqlValidateUser, [username], (err, result) => {
+                if(err){
+                    res.send({err: err});
+                }
+
+                /* If we got a username with a match */
+                if(result.length > 0){
+                    //console.log(result);
+                    res.send("You already have an account!")
+                    authError = true; // set this flag so we don't crate another user
+                }
+                else if(result.length == 0){
+                    // Only if this user is not in the records, let's create the account
+                    const sqlInsert = `INSERT INTO user (username, password) VALUES (?,?);`
+                    db.query(sqlInsert, [username, hash], (err, result) => {
+                        console.log(err);
+                        res.send("User successfully registerd!")
+                    })
+                }
+
+        })
+    })
 });
 
 app.post("/api/deleteUser", (req, res) => {

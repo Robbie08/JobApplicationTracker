@@ -8,50 +8,78 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { CardHeader, listClasses } from '@mui/material';
 import Axios from 'axios';
+import {useCookies} from 'react-cookie';
 
 function ApplicationList() {
+
   
-  // This useEffect will allow us to retrieve the list of companies once the page is refreshed
-  React.useEffect(()=>{
-      console.log("Component mounted at -> " +Date.now())
-      getApplicationList();
-  },[])
+  
   /**
-   * We use this to track state of fields
-   */
+ * We use this to track state of fields
+ */
   const [company, setCompany] = useState("");
   const [positionTitle, setPositionTitle] = useState("");
   const [dateApplied, setDateApplied] = useState("");
   const [methodOfApplication, setMethodOfApplication] = useState("");
   const [linkToApplication, setLinkofApplication] = useState("");
-  const [status, setStatus] = useState("");
+  const [appstatus, setAppStatus] = useState("");
   const [comments, setComments] = useState("");
   const  [companyList, setCompanyList] = useState([{applicationId: 3, company: 'Google', position: 'Software Engineer I', date: 'Aug 12, 2021'}, {applicationId: 4, company: 'Intuit', position: 'Software Engineer II', date: 'July 10, 2021'}]);
+  const [loggedin, setLoggedIn] = useState("");
+  const [cookies, setCookie] = useCookies(["userId"]);
+  const [currentUser, setCurrentUser] = useState("User");
+  Axios.defaults.withCredentials = true;  // we need this in order to access our cookies
 
-    // include useEffect
+  // This useEffect will allow us to retrieve the list of companies once the page is refreshed
+  React.useEffect(()=>{
+      console.log("Component mounted at -> " +Date.now())
+      console.log(cookies)
 
-    React.useEffect(() => {
+      Axios.get('http://localhost:4000/api/logininfo')
+      .then((response) => response.data )
+      .then((response) => { 
+        console.log(response[0]);
+        setCurrentUser(response[0].username);
+        console.log("curr user: " +currentUser)
+
+      }).catch((err) =>{
+        console.log(err);
+      });
       getApplicationList();
-    },[])
+      
+  },[])
+
+
   
     function getApplicationList(){
       Axios.get('http://localhost:4000/api/getApplications')
       .then((response) => response.data )
       .then((response) => { 
-        //setCompanyList([...companyList, response]);
         setCompanyList(response)
       });
-
       console.log(companyList)
     }
 
     function onSubmitApplication(){
       Axios.post('http://localhost:4000/api/addApplication',{
           company: company,
+          position: positionTitle,
+          date: dateApplied,
+          method: methodOfApplication,
+          link: linkToApplication,
+          appstatus: appstatus,
+          comments: comments
       })
       .then((response) => {
           console.log(response)
           getApplicationList();
+          setCompany("");
+          setPositionTitle("");
+          setDateApplied("");
+          setMethodOfApplication("");
+          setLinkofApplication("");
+          setAppStatus("");
+          setComments("");
       });
      
     }
@@ -98,14 +126,22 @@ function ApplicationList() {
      
         return(         
             <div>
-                <h2>Applications</h2>
+                <h2>Welcome {currentUser}</h2>
         
                 <div className="input-form">
-                  <div className="input-form">
-                  <TextField onChange={e => {setCompany(e.target.value)}} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" />
-                  </div>
-                 <div><Button onClick={() => onSubmitApplication()} variant="contained">Submit</Button></div>
+                 <TextField onChange={e => {setCompany(e.target.value)}} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" required />  &nbsp;
+                 <TextField onChange={e => {setPositionTitle(e.target.value)}} placeholder="Software Engineer" id="outlined-basic" label="Position Title" variant="outlined" required />  &nbsp;
+                 <TextField onChange={e => {setDateApplied(e.target.value)}} placeholder="MM/DD/YYYY" id="outlined-basic" label="Date Applied" variant="outlined" required />  &nbsp;
+                 <TextField onChange={e => {setMethodOfApplication(e.target.value)}} placeholder="Linkedin" id="outlined-basic" label="Method of Application" variant="outlined" /> &nbsp;
+                 <p></p>
+                 <TextField onChange={e => {setLinkofApplication(e.target.value)}} id="outlined-basic" label="Link to Application" variant="outlined" /> &nbsp;
+                 <TextField onChange={e => {setAppStatus(e.target.value)}} placeholder="Applied" id="outlined-basic" label="Status" variant="outlined" /> &nbsp;
+                 <p></p>
+                 <TextField  onChange={e => {setComments(e.target.value)}} id="outlined-basic" label="Comments" variant="outlined" /> &nbsp;
                 </div>
+                <br></br>
+                <div><Button onClick={() => onSubmitApplication()} variant="contained">Submit</Button></div>
+                <br></br>
                 <div className="ui-cards">
                     {companyList.map((record) => (
                       
@@ -115,23 +151,26 @@ function ApplicationList() {
                               title={record["company"]}
                               subheader={record["position"]}
                           />
-                          <CardMedia
+                          {/**
+                            <CardMedia
                             component="img"
                             width= "50%"
                             height= "160"
-                            image={`${process.env.PUBLIC_URL}/images/google.png`   /*This accesses our working dir at public/images/   */}
+                            image={`${process.env.PUBLIC_URL}/images/google.png`   // This accesses our working dir at public/images/ }
                             alt="job_post"
                           />
+                          **/}
+                          
                           
                           <CardContent>
                             <Typography  align="left" variant="body2" color="text.secondary">
                               Date: {record["date"]}
                             </Typography>
                             <Typography align="left" variant="body2" color="text.secondary">
-                              Status: Final Round
+                              Status: {record["appstatus"]}
                             </Typography>
                             <Typography  align="left" variant="body2" color="text.secondary">
-                              Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...
+                              {record["comments"]}
                             </Typography>
                           </CardContent>
                           <CardActions>
