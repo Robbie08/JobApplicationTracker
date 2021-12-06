@@ -77,9 +77,34 @@ app.get("/api/getApplications", (req,res) =>{
 /**
  * Logic to handle DELETE operation from our MySQL database
  */
-app.get("/deleteApplication", (req, res) => {
-    console.log("Processing delete op")
-    res.send(`Application to delete`)
+app.delete("/api/deleteApplication/:appId", (req, res) => {
+ 
+
+        console.log(req.params.appId)
+        const applicationId = req.params.appId
+        // let authError = false;
+    
+        // check if this user does not exist first
+        const sqlValidateUser = "SELECT * FROM jobapplicationtracker.jobapplication WHERE `applicationId` = ?;"
+        db.query(sqlValidateUser, [applicationId], (err, result) => {
+                if(err){
+                    res.send({err: err});
+                }
+    
+                /* If we got a username and password with a match */
+                if(result.length > 0){
+                    // Only if this user is in the records let's delete the account
+                    const sqlInsert = "DELETE FROM jobapplicationtracker.jobapplication WHERE `applicationId` = ?;"
+                    db.query(sqlInsert, [applicationId], (err, result) => {
+                        //console.log(err);
+                        res.send("Application deleted!")
+                    })
+                }
+                else if(result.length == 0){
+                    res.send("This application ID is invalid")
+                }
+        })
+    
 })
 
 
