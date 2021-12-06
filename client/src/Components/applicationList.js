@@ -28,7 +28,11 @@ function ApplicationList() {
   const [comments, setComments] = useState("");
   const  [companyList, setCompanyList] = useState([{applicationId: 3, company: 'Google', position: 'Software Engineer I', date: 'Aug 12, 2021'}, {applicationId: 4, company: 'Intuit', position: 'Software Engineer II', date: 'July 10, 2021'}]);
 
+    // include useEffect
 
+    React.useEffect(() => {
+      getApplicationList();
+    },[])
   
     function getApplicationList(){
       Axios.get('http://localhost:4000/api/getApplications')
@@ -47,8 +51,9 @@ function ApplicationList() {
       })
       .then((response) => {
           console.log(response)
+          getApplicationList();
       });
-      getApplicationList();
+     
     }
     /**
      *  This function is called when the "edit" button is clicked on the card
