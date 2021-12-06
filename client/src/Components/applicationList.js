@@ -11,6 +11,11 @@ import Axios from 'axios';
 
 function ApplicationList() {
   
+  // This useEffect will allow us to retrieve the list of companies once the page is refreshed
+  React.useEffect(()=>{
+      console.log("Component mounted at -> " +Date.now())
+      getApplicationList();
+  },[])
   /**
    * We use this to track state of fields
    */
