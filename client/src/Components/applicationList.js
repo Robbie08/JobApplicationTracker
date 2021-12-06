@@ -29,7 +29,8 @@ function ApplicationList() {
       Axios.get('http://localhost:4000/api/getApplications')
       .then((response) => response.data )
       .then((response) => { 
-        setCompanyList([{response}]);
+        //setCompanyList([...companyList, response]);
+        setCompanyList(response)
       });
 
       console.log(companyList)
@@ -48,9 +49,17 @@ function ApplicationList() {
      *  This function is called when the "edit" button is clicked on the card
      *  We can find the call inside the <Button> tag
      */
-    function onDeleteClick(){
+    function onDeleteClick(appId){
+      
         // do stuff when button is clicked
-        console.log('Clicked Delete!')
+        Axios.delete(`http://localhost:4000/api/deleteApplication/${appId}`)
+        .then((response) => {
+            console.log(response)
+            getApplicationList();
+        }).catch(err => {
+          return err;
+        });
+        
     }
 
     /**
@@ -87,10 +96,9 @@ function ApplicationList() {
                   </div>
                  <div><Button onClick={() => onSubmitApplication()} variant="contained">Submit</Button></div>
                 </div>
-          
-                
                 <div className="ui-cards">
                     {companyList.map((record) => (
+                      
                         <Card sx={{ maxWidth: 345 }}>
                           {/* we can edit card content starting here*/}
                           <CardHeader 
@@ -119,15 +127,15 @@ function ApplicationList() {
                           <CardActions>
 
                           {/*We use onClick caller to call our handler functions... that we put outside of render */}
-                            <Button size="small" onClick={() => this.onEditClick()}>Edit</Button>
-                            <Button size="small" onClick={() => this.onDeleteClick()}>Delete</Button>
-                            <Button size="small" onClick={() => this.onGoToPortalClick()}>Go To Portal</Button>
+                            <Button size="small" onClick={() => onEditClick()}>Edit</Button>
+                            <Button size="small" onClick={() => onDeleteClick(record["applicationId"])}>Delete</Button>
+                            <Button size="small" onClick={() => onGoToPortalClick()}>Go To Portal</Button>
                           </CardActions>
                       </Card>
-
+                     
                     ))} 
-                
-                </div>
+                    </div>
+               
                   
             </div>
             
