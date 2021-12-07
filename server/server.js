@@ -14,6 +14,7 @@ const bcrypt        = require("bcrypt")             // allos us to use hashing a
 const bodyParser    = require("body-parser");       // parses the front-end body
 const cookieParser  = require("cookie-parser");     // parse all cookies
 const session       = require("express-session")    // creating sessions
+const cookie        = require("cookie");
 const saltRounds    = 10
 
 const app = express();   // save instance of express in app
@@ -69,9 +70,13 @@ app.get("/applications", (req, res) => {
     res.send("list of all job applications")
 })
 
-app.get("/api/getApplications", (req,res) =>{
-    const getApplicationsQuery = "SELECT * FROM jobapplicationtracker.jobapplication;"
-    db.query(getApplicationsQuery, (err, response) => {
+app.post("/api/getApplications", (req,res) =>{
+    const userId = req.body.userId
+    console.log("userId: "+userId)
+
+
+    const getApplicationsQuery = "SELECT * FROM jobapplicationtracker.jobapplication WHERE userId = ?;"
+    db.query(getApplicationsQuery,[userId], (err, response) => {
         if(err) console.log(err)
         else res.send(response)
     })
@@ -88,13 +93,14 @@ app.get("/api/getApplications", (req,res) =>{
     const link      = req.body.link;
     const appstatus = req.body.appstatus;
     const comments  = req.body.comments;
+    const userId    = req.body.userId
 
     if(link == null)
         link = "n/a";
 
     // Only if this user is not in the records, let's create the account
-    const sqlInsert = `INSERT INTO jobapplication (company, position, date, method, appstatus, comments) VALUES (?,?,?,?,?,?);`
-    db.query(sqlInsert, [company, position, date, link,appstatus,comments], (err, result) => {
+    const sqlInsert = `INSERT INTO jobapplication (company, position, date, method, appstatus, comments, userId) VALUES (?,?,?,?,?,?,?);`
+    db.query(sqlInsert, [company, position, date, link,appstatus,comments, userId], (err, result) => {
         console.log(err);
         res.send("You hit me!")
     })
@@ -138,11 +144,13 @@ app.delete("/api/deleteApplication/:appId", (req, res) => {
 app.get("/api/logininfo", (req, res) => {
     const getSessionUser = "SELECT * FROM jobapplicationtracker.usersession WHERE sessionId = 1;"
     db.query(getSessionUser, (req,resp) => {
+        console.log(resp)
         res.send(resp);
     })
 
     console.log("Cookies from logininfo:")
-    console.log(req.cookies);
+    //req.cookies
+    //console.log(cookie.parse(req.headers.cookie || ''));
 
 })
 

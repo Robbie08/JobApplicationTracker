@@ -28,6 +28,7 @@ function ApplicationList() {
   const [loggedin, setLoggedIn] = useState("");
   const [cookies, setCookie] = useCookies(["userId"]);
   const [currentUser, setCurrentUser] = useState("User");
+  const [currentUserId, setCurrentUserId] = useState(1)
   Axios.defaults.withCredentials = true;  // we need this in order to access our cookies
 
   // This useEffect will allow us to retrieve the list of companies once the page is refreshed
@@ -40,19 +41,24 @@ function ApplicationList() {
       .then((response) => { 
         console.log(response[0]);
         setCurrentUser(response[0].username);
-        console.log("curr user: " +currentUser)
+        setCurrentUserId(response[0].userId)
+        console.log("curr user: " +response[0].userId)
+        getApplicationList(response[0].userId);                     // Grab our applications list only if we have retrieved user
 
       }).catch((err) =>{
         console.log(err);
       });
-      getApplicationList();
+      
       
   },[])
 
 
   
-    function getApplicationList(){
-      Axios.get('http://localhost:4000/api/getApplications')
+    function getApplicationList(curruser){
+      console.log("userID: " +curruser)
+      Axios.post('http://localhost:4000/api/getApplications',{
+        userId: curruser
+      })
       .then((response) => response.data )
       .then((response) => { 
         setCompanyList(response)
@@ -68,11 +74,12 @@ function ApplicationList() {
           method: methodOfApplication,
           link: linkToApplication,
           appstatus: appstatus,
-          comments: comments
+          comments: comments,
+          userId:currentUserId
       })
       .then((response) => {
           console.log(response)
-          getApplicationList();
+          getApplicationList(currentUserId);
           setCompany("");
           setPositionTitle("");
           setDateApplied("");
@@ -107,6 +114,7 @@ function ApplicationList() {
     function onEditClick(){
         // do stuff when button is clicked
         console.log('Clicked Edit!')
+
     }
 
     /**
@@ -176,7 +184,7 @@ function ApplicationList() {
                           <CardActions>
 
                           {/*We use onClick caller to call our handler functions... that we put outside of render */}
-                            <Button size="small" onClick={() => onEditClick()}>Edit</Button>
+                            <Button size="small" onClick={() => onEditClick(record["applicationId"])}>Edit</Button>
                             <Button size="small" onClick={() => onDeleteClick(record["applicationId"])}>Delete</Button>
                             <Button size="small" onClick={() => onGoToPortalClick()}>Go To Portal</Button>
                           </CardActions>
