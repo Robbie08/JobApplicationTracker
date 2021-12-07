@@ -3,6 +3,8 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Axios from 'axios';
 import {useNavigate} from "react-router-dom";
+import Container from '@mui/material/Container';
+import Grid from "@mui/material/Grid";
 
 function Login() {
 
@@ -83,8 +85,6 @@ function Login() {
             });        
             //window.open("https://www.google.com/", "_blank")    // params (URL, "_blank"); _blank opens url in new tab
 
-            setUsername("");
-            setPassword("");
         }
         else{
             console.log("register values are null")
@@ -108,13 +108,34 @@ function Login() {
             });        
             //window.open("https://www.google.com/", "_blank")    // params (URL, "_blank"); _blank opens url in new tab
 
-            setUsername("");
-            setPassword("");
         }
         else{
             console.log("register values are null")
         }
     } 
+
+    function onUpdateUser(){
+        // make sure to clear text
+        console.log("UserName: " +username);
+        console.log("Password: " +password);
+
+        if(username && password){
+            Axios.post("http://localhost:4000/api/updateUser", {
+                username: username, 
+                password: password
+            }).then((response) => {
+                console.log(response.data)
+                setLoginStatus(response.data.message)
+            }).catch(err => {
+                return err;
+            });
+            //window.open("https://www.google.com/", "_blank")    // params (URL, "_blank"); _blank opens url in new tab
+
+        }
+        else{
+            console.log("register values are null")
+        }
+    }
 
     /**
      * The value={} will grab our value from our state and display whatever the current state is set to. By default it's "".
@@ -122,23 +143,34 @@ function Login() {
      */
   
     return(         
-        <div>
-            <h2>Login</h2>
+        <Container>
+            <h2>Login/Registration</h2>
             <div className="login-form">
                 <div className="login-user-textfields">
                     <TextField onChange={(e) => {setUsername(e.target.value)}} placeholder="johnnyboy123" id="outlined-basic" label="username" variant="outlined" />
                 </div>
+                <br></br>
                 <div className="login-user-textfields">
                     <TextField onChange={(e) => {setPassword(e.target.value)}} placeholder="123456" id="outlined-basic" label="password" type="password" variant="outlined" />
                 </div>
-                <div className="login-form-buttons">
+                <br></br>
+                <Grid container spacing={3} className="login-form-buttons">
+                    <Grid item>
                     <Button onClick={() => onLoginClick()} variant="contained">Login</Button>
+                    </Grid>
+                    <Grid item>
                     <Button onClick={() => onRegisterClick()} variant="contained">Register</Button>
+                    </Grid>
+                    <Grid item>
                     <Button onClick={() => onDeleteUser()} variant="contained">Delete User</Button>
-                </div>
+                    </Grid>
+                    <Grid item>
+                    <Button onClick={() => onUpdateUser()} variant="contained">Update Password</Button>
+                    </Grid>
+                </Grid>
             </div>
             <h4>{loginStatus}</h4>
-        </div>
+        </Container>
     )
 
 }

@@ -9,6 +9,9 @@ import Typography from '@mui/material/Typography';
 import { CardHeader, listClasses } from '@mui/material';
 import Axios from 'axios';
 import {useCookies} from 'react-cookie';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid'
+
 
 function ApplicationList() {
 
@@ -80,16 +83,28 @@ function ApplicationList() {
       .then((response) => {
           console.log(response)
           getApplicationList(currentUserId);
-          setCompany("");
-          setPositionTitle("");
-          setDateApplied("");
-          setMethodOfApplication("");
-          setLinkofApplication("");
-          setAppStatus("");
-          setComments("");
       });
      
     }
+
+       /**
+     * This function is called when the "delete" button is clicked on the card
+     * We can find the call inside the <Button> tag
+     */
+        function onEditClick(appId){
+          // do stuff when button is clicked
+          console.log("AppId: "+appId)
+          console.log('Clicked Edit!')
+          Axios.post(`http://localhost:4000/api/updateApplication/${appId}`, {
+            appstatus:appstatus,
+            comments: comments,
+          })
+          .then((response) => {
+            console.log(response)
+            getApplicationList(currentUserId)
+          })
+      }
+
     /**
      *  This function is called when the "edit" button is clicked on the card
      *  We can find the call inside the <Button> tag
@@ -100,22 +115,14 @@ function ApplicationList() {
         Axios.delete(`http://localhost:4000/api/deleteApplication/${appId}`)
         .then((response) => {
             console.log(response)
-            getApplicationList();
+            getApplicationList(currentUserId);
         }).catch(err => {
           return err;
         });
         
     }
 
-    /**
-     * This function is called when the "delete" button is clicked on the card
-     * We can find the call inside the <Button> tag
-     */
-    function onEditClick(){
-        // do stuff when button is clicked
-        console.log('Clicked Edit!')
-
-    }
+ 
 
     /**
      * This function is called when the "delete" button is clicked on the card
@@ -132,10 +139,12 @@ function ApplicationList() {
      * We use the onChange={e => this.setState({})} to allow for user input into the text field.
      */
      
-        return(         
-            <div>
+        return(       
+            
+            <Container>
                 <h2>Welcome {currentUser}</h2>
         
+                <h4>Enter Application information</h4>
                 <div className="input-form">
                  <TextField onChange={e => {setCompany(e.target.value)}} placeholder="Microsoft" id="outlined-basic" label="Company" variant="outlined" required />  &nbsp;
                  <TextField onChange={e => {setPositionTitle(e.target.value)}} placeholder="Software Engineer" id="outlined-basic" label="Position Title" variant="outlined" required />  &nbsp;
@@ -150,9 +159,9 @@ function ApplicationList() {
                 <br></br>
                 <div><Button onClick={() => onSubmitApplication()} variant="contained">Submit</Button></div>
                 <br></br>
-                <div className="ui-cards">
+                <Grid container spacing={3} className="ui-cards">
                     {companyList.map((record) => (
-                      
+                      <Grid item >
                         <Card sx={{ maxWidth: 345 }}>
                           {/* we can edit card content starting here*/}
                           <CardHeader 
@@ -168,16 +177,15 @@ function ApplicationList() {
                             alt="job_post"
                           />
                           **/}
-                          
-                          
                           <CardContent>
                             <Typography  align="left" variant="body2" color="text.secondary">
-                              Date: {record["date"]}
+                              <b>Date applied:</b> {record["date"]}
                             </Typography>
                             <Typography align="left" variant="body2" color="text.secondary">
-                              Status: {record["appstatus"]}
+                              <b>Application Status:</b> {record["appstatus"]}
                             </Typography>
                             <Typography  align="left" variant="body2" color="text.secondary">
+                              <b>Comments:</b><br></br>
                               {record["comments"]}
                             </Typography>
                           </CardContent>
@@ -189,12 +197,12 @@ function ApplicationList() {
                             <Button size="small" onClick={() => onGoToPortalClick()}>Go To Portal</Button>
                           </CardActions>
                       </Card>
-                     
+                      </Grid>
                     ))} 
-                    </div>
+                </Grid>
                
                   
-            </div>
+            </Container>
             
         )
 }
