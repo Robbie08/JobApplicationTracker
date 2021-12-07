@@ -247,6 +247,73 @@ app.post("/api/register", (req, res) => {
     })
 });
 
+app.post("/api/updateApplication/:appId", (req, res) => {
+
+    const appstatus = req.body.appstatus
+    const comments = req.body.comments
+    const appid = req.params.appId
+
+    console.log("AppId: "+appid)
+
+    // check if this user does not exist first
+    const sqlValidateUser = "SELECT * FROM jobapplicationtracker.jobapplication WHERE applicationId = ?;"
+    db.query(sqlValidateUser, [appid], (err, result) => {
+            if(err){
+                res.send({err: err});
+            }
+
+            /* If we got a username and password with a match */
+            if(result.length > 0){
+                // Only if this user is in the records let's delete the account
+                const sqlUpdateCard = "UPDATE jobapplicationtracker.jobapplication SET appstatus = ?, comments = ? WHERE applicationId = ?;"
+                db.query(sqlUpdateCard, [appstatus, comments, appid], (err, result) => {
+                    console.log(err);
+                    res.send("Card updated!")
+                })
+            
+            }
+            else if(result.length == 0){
+                res.send("This card doesn't exists")
+            }
+    })
+});
+
+
+app.post("/api/updateUser", (req, res) => {
+
+    const username = req.body.username
+    const password = req.body.password
+
+    let authError = false;
+
+    // check if this user does not exist first
+    const sqlValidateUser = "SELECT * FROM jobapplicationtracker.user WHERE username = ?;"
+    db.query(sqlValidateUser, [username], (err, result) => {
+            if(err){
+                res.send({err: err});
+            }
+
+            /* If we got a username and password with a match */
+            console.log('hello',result)
+            if(result.length > 0){
+                bcrypt.hash(password, saltRounds, (err, hash) => {
+                    if(err){
+                        res.send({err:err})
+                    }
+                    // Only if this user is in the records let's delete the account
+                    const sqlInsert = "UPDATE jobapplicationtracker.user SET password = ? WHERE username = ?;"
+                    db.query(sqlInsert, [hash, username], (err, result) => {
+                        console.log(err);
+                        res.send("User updated!")
+                    })
+                })
+            }
+            else if(result.length == 0){
+                res.send("No user found")
+            }
+    })
+});
+
 app.post("/api/deleteUser", (req, res) => {
 
     const username = req.body.username
@@ -263,11 +330,17 @@ app.post("/api/deleteUser", (req, res) => {
 
             /* If we got a username and password with a match */
             if(result.length > 0){
+                bcrypt.hash(password, saltRounds, (err, hash) => {
+                    if(err){
+                        res.send({err:err})
+                    }
                 // Only if this user is in the records let's delete the account
-                const sqlInsert = "DELETE FROM jobapplicationtracker.user WHERE `username` = ? AND `password` = ?;"
-                db.query(sqlInsert, [username, password], (err, result) => {
+                const sqlInsert = "DELETE FROM jobapplicationtracker.user WHERE `username` = ?;"
+                db.query(sqlInsert, [username, hash], (err, result) => {
                     console.log(err);
                     res.send("User deleted!")
+                })
+
                 })
             }
             else if(result.length == 0){
