@@ -91,6 +91,7 @@ app.post("/api/getApplications", (req,res) =>{
     const position  = req.body.position;
     const date      = req.body.date;
     const link      = req.body.link;
+    const method    = req.body.method
     const appstatus = req.body.appstatus;
     const comments  = req.body.comments;
     const userId    = req.body.userId
@@ -99,13 +100,44 @@ app.post("/api/getApplications", (req,res) =>{
         link = "n/a";
 
     // Only if this user is not in the records, let's create the account
-    const sqlInsert = `INSERT INTO jobapplication (company, position, date, method, appstatus, comments, userId) VALUES (?,?,?,?,?,?,?);`
-    db.query(sqlInsert, [company, position, date, link,appstatus,comments, userId], (err, result) => {
+    const sqlInsert = `INSERT INTO jobapplication (company, position, date, method, link, appstatus, comments, userId) VALUES (?,?,?,?,?,?,?,?);`
+    db.query(sqlInsert, [company, position, date, method, link,appstatus,comments, userId], (err, result) => {
         console.log(err);
         res.send("You hit me!")
     })
 
 });
+
+
+app.post("/api/getAppLink/:appId", (req, res) => {
+ 
+
+    console.log(req.params.appId)
+    const applicationId = req.params.appId
+    // let authError = false;
+
+    // check if this user does not exist first
+    const sqlValidateUser = "SELECT * FROM jobapplicationtracker.jobapplication WHERE `applicationId` = ?;"
+    db.query(sqlValidateUser, [applicationId], (err, result) => {
+            if(err){
+                res.send({err: err});
+            }
+
+            /* If we got a username and password with a match */
+            if(result.length > 0){
+                // Only if this user is in the records let's delete the account
+                const sqlInsert = "SELECT link FROM jobapplicationtracker.jobapplication WHERE `applicationId` = ?;"
+                db.query(sqlInsert, [applicationId], (err, result) => {
+                    //console.log(err);
+                    res.send(result)
+                })
+            }
+            else if(result.length == 0){
+                res.send("This application ID is invalid")
+            }
+    })
+
+})
 
 /**
  * Logic to handle DELETE operation from our MySQL database
