@@ -54,11 +54,11 @@ function ApplicationList() {
       
       
   },[])
-
-
-
-
   
+    /**
+     * Makes a reques to the server to get the applications for the specific user.
+     * @param {UserId} curruser 
+     */
     function getApplicationList(curruser){
       console.log("userID: " +curruser)
       Axios.post('http://localhost:4000/api/getApplications',{
@@ -71,6 +71,11 @@ function ApplicationList() {
       console.log(companyList)
     }
 
+
+    /* This function is called when the user clicks on the submit form. It
+       will send our server a request to add a new application with the text
+       inside the text fields provided.
+    */
     function onSubmitApplication(){
       Axios.post('http://localhost:4000/api/addApplication',{
           company: company,
@@ -91,7 +96,7 @@ function ApplicationList() {
 
     
        /**
-     * This function is called when the "delete" button is clicked on the card
+     * This function is called when the "Edit" button is clicked on the card
      * We can find the call inside the <Button> tag
      */
         function onEditClick(appId){
@@ -109,7 +114,7 @@ function ApplicationList() {
       }
 
     /**
-     *  This function is called when the "edit" button is clicked on the card
+     *  This function is called when the "delete" button is clicked on the card
      *  We can find the call inside the <Button> tag
      */
     function onDeleteClick(appId){
@@ -128,8 +133,7 @@ function ApplicationList() {
  
 
     /**
-     * This function is called when the "delete" button is clicked on the card
-     * We can find the call inside the <Button> tag
+     * On click listener for when the button is clicked on the card to redirect us to the portal
      */
     function onGoToPortalClick(appId){
         // Go to application link
@@ -183,15 +187,6 @@ function ApplicationList() {
                               title={record["company"]}
                               subheader={record["position"]}
                           />
-                          {/**
-                            <CardMedia
-                            component="img"
-                            width= "50%"
-                            height= "160"
-                            image={`${process.env.PUBLIC_URL}/images/google.png`   // This accesses our working dir at public/images/ }
-                            alt="job_post"
-                          />
-                          **/}
                           <CardContent>
                             <Typography  align="left" variant="body2" color="text.secondary">
                               <b>Date applied:</b> {record["date"]}
